@@ -1,0 +1,37 @@
+---
+
+- name: Install Docker container engine
+  register: install_docker
+  include_tasks: pkg.yml
+
+- name: Copy Docker engine service file
+  register: change_docker
+  template:
+    src: "docker.service.j2"
+    dest: "{{ systemd_dir }}/docker.service"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Copy Docker environment config file
+  register: env_docker
+  template: src=docker.j2 dest={{ system_env_dir }}/docker
+
+- name: Add any insecure registrys to Docker config
+  register: add_insecure_registry
+  when: insecure_registrys is defined and insecure_registrys > 0
+  lineinfile: dest={{ system_env_dir }}/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
+
+- name: Add registry to Docker config
+  register: add_registry
+  when: add_registry is defined and add_registry > 0
+  lineinfile: dest={{ system_env_dir }}/docker regexp=^ADD_REGISTRY= line=ADD_REGISTRY="{% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
+
+- name: Enable and restart Docker engine
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_docker
+  when: install_docker.changed or change_docker.changed or env_docker.changed or add_insecure_registry.changed or add_registry.changed

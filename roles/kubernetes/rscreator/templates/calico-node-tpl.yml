@@ -1,0 +1,4 @@
+- name: Calico Node {{nodename}}
+  template:
+    src: templates/calico-node.yaml.j2
+    dest: "/tmp/calico-rs-{{nodename}}"

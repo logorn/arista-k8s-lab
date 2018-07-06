@@ -1,0 +1,6 @@
+#jinja2: lstrip_blocks: True
+{% include "header.html" %}
+{% for device in hostvars[inventory_hostname].groups.all %}
+{% include "output/report-" ~ device ~ ".html" %}
+{% endfor %}
+{% include "footer.html" %}

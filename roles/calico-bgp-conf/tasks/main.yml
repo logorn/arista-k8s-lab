@@ -1,0 +1,70 @@
+---
+- name: Check proper default pool cidr
+  shell: 'kubectl exec -i -n kube-system calicoctl -- /calicoctl get IPPool default-ipv4-ippool -o yaml | grep "cidr: {{pod_network_cidr}}"'
+  changed_when: False
+  ignore_errors: True
+  register: df_pool_cidr
+
+- name: Check proper default pool ipip mode
+  shell: 'kubectl exec -i -n kube-system calicoctl -- /calicoctl get IPPool default-ipv4-ippool -o yaml | grep "ipipMode: Never"'
+  changed_when: False
+  ignore_errors: True
+  register: df_pool_ipipmode
+
+- name: Configure calico default pool
+  when: df_pool_cidr.rc != 0 or df_pool_ipipmode.rc != 0
+  shell: |
+    kubectl exec -i -n kube-system calicoctl -- /calicoctl apply -f -
+  args:
+    stdin: |
+      apiVersion: projectcalico.org/v3
+      kind: IPPool
+      metadata:
+        name: default-ipv4-ippool
+      spec:
+        cidr: {{pod_network_cidr}}
+        ipipMode: Never
+        natOutgoing: False
+
+- name: BGPPeers
+  shell: 'kubectl exec -i -n kube-system calicoctl -- /calicoctl get BGPPeer as-{{hostvars[item]["toras"]}}-{{item}}'
+  loop: "{{ groups[group] }}"
+  ignore_errors: True
+  changed_when: False
+  register: bgppeers_checking
+
+- name: Peers creation
+  shell: 'kubectl exec -i -n kube-system calicoctl -- /calicoctl create -f -'
+  args:
+    stdin: |
+      apiVersion: projectcalico.org/v3
+      kind: BGPPeer
+      metadata:
+        name: as-{{hostvars[item.0]["toras"]}}-{{item.0}}
+      spec:
+        node: {{item.0}}
+        peerIP: {{hostvars[item.0]["torpeerip"]}}
+        asNumber: {{hostvars[item.0]["toras"]}}
+  with_together:
+    - "{{ groups[group] }}"
+    - "{{ bgppeers_checking.results }}"
+  when: item.1.rc != 0
+
+- name: Check node to node full mesh is disabled
+  shell: "kubectl exec -i -n kube-system calicoctl -- /calicoctl get BGPConfiguration default -o go-template='{{'{{'}}range .{{'}}'}}{{'{{'}}.Spec.NodeToNodeMeshEnabled{{'}}'}}{{'{{'}}end{{'}}'}}' | grep false"
+  changed_when: False
+  register: full_mesh_disabled
+  ignore_errors: True
+
+- name: Disable full mesh
+  shell: "kubectl exec -i -n kube-system calicoctl -- /calicoctl apply -f -"
+  args:
+    stdin: |
+      apiVersion: projectcalico.org/v3
+      kind: BGPConfiguration
+      metadata:
+        name: default
+      spec:
+        logSeverityScreen: Info
+        nodeToNodeMeshEnabled: false
+  when: full_mesh_disabled.rc != 0

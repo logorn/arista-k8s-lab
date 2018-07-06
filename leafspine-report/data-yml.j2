@@ -1,0 +1,26 @@
+#jinja2: lstrip_blocks: True
+hostname: {{ inventory_hostname }}
+localas: {{ bgppeers.asn }}
+peerings:
+{% for iface,ifprops in intips|dictsort %}
+  {% set fullnet = ifprops.interfaceAddress.primaryIp.address ~ "/" ~ ifprops.interfaceAddress.primaryIp.maskLen %}
+  {% for peer, peerprops in bgppeers.peers|dictsort %}
+    {% if iface is not equalto "Loopback0" %}
+      {% if peer|ipaddr(fullnet) %}
+  - interface: {{ iface }}
+    intstatus: {{ ifprops.interfaceStatus }}
+    lpstatus: {{ ifprops.lineProtocolStatus }}
+    enabled: {{ ifprops.enabled }}
+    ip: {{ fullnet }}
+    peer: {{ peer }}
+    remoteas: {{ peerprops.asn }}
+    prefixrx: {{ peerprops.prefixReceived }}
+    peerstate: {{ peerprops.peerState }}
+      {% for lldppeer in lldpnei if lldppeer.port is equalto iface %}
+    peerhost: {{ lldppeer.neighborDevice }}
+    peerport: {{ lldppeer.neighborPort }}
+      {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}

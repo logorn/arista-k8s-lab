@@ -1,0 +1,20 @@
+---
+maxspines: 4
+spines: 1
+leaves: 2
+baseasn: 64520
+p2plength: 31
+loopbackprefix: 10.254.254.0/24
+loopbackint: 0
+p2pprefix: 10.254.0.0/27
+rackprefixdata: 10.100.0.0/16
+racklength: 24
+firstuplink: 2
+leafprefix: leaf
+spineprefix: spine
+cli:
+  host: "{{ ansible_host }}"
+  username: vagrant
+  password: vagrant
+  transport: cli
+...

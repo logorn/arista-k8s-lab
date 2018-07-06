@@ -1,0 +1,2 @@
+---
+apiserver_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] }}"

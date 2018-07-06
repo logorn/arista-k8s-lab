@@ -1,0 +1,29 @@
+- name: Scan Host by both Hostname and IP
+  command: "/usr/bin/ssh-keyscan -T 10 -t ssh-rsa {{item}},{{ hostvars[item]['ansible_host'] }}"
+  register: keyscan_by_hostname_ip
+  changed_when: False
+  loop: "{{ groups[group] }}"
+  when: "'ansible_host' in hostvars[item]"
+
+- name: Scan Host by Hostname
+  command: "/usr/bin/ssh-keyscan -T 10 -t ssh-rsa {{ item }}"
+  register: keyscan
+  changed_when: False
+  loop: "{{ groups[group] }}"
+  when: "not ('ansible_host' in hostvars[item])"
+
+- name: Add Host by Hostname to known_hosts
+  lineinfile:
+    path: ~/.ssh/known_hosts
+    line: "{{ item.stdout }}"
+    create: yes
+  with_items: "{{ keyscan.results }}"
+  when: item.has_key('stdout') and item['stdout'] != ''
+
+- name: Add Host by Hostname and IP to known_hosts
+  lineinfile:
+    path: ~/.ssh/known_hosts
+    line: "{{ item.stdout }}"
+    create: yes
+  with_items: "{{ keyscan_by_hostname_ip.results }}"
+  when: item.has_key('stdout') and item['stdout'] != ''

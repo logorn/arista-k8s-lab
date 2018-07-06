@@ -1,0 +1,58 @@
+---
+- name: Add host keys on applying node
+  gather_facts: yes
+  hosts: nms
+  roles:
+    - gather-ssh-keys
+
+- name: Configure switching infrastructure
+  gather_facts: no
+  hosts: switches
+  roles:
+    - switch
+
+- name: Docker for k8s node
+  gather_facts: no
+  become: yes
+  hosts: kubernetes
+  roles:
+    - { role: docker, tag: docker }
+
+- name: Config for k8s master nodes
+  gather_facts: yes
+  become: yes
+  hosts: master
+  roles:
+    - { role: kubernetes/master, tags: master }
+
+- name: Config for k8s worker nodes
+  gather_facts: yes
+  become: yes
+  hosts: worker
+  roles:
+    - { role: kubernetes/node, tags: worker }
+
+- name: Create k8s resources
+  become: yes
+  hosts: master
+  environment:
+    K8S_AUTH_KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  roles:
+    - { role: kubernetes/rscreator }
+
+- name: Calicoctl
+  become: yes
+  hosts: kubernetes
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  roles:
+    - { role: calicoctl }
+
+- name: Calicoctl bgp config
+  become: yes
+  hosts: master
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  roles:
+    - { role: calico-bgp-conf }

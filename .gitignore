@@ -1,0 +1,8 @@
+vEOS-lab-4.19.7M-virtualbox.box
+.vagrant
+datamodel/output
+leafspine-report/output
+output/
+*.retry
+backup/
+deps-install.sh

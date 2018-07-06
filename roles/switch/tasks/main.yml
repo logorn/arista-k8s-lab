@@ -1,0 +1,61 @@
+---
+- name: Set Validation Facts
+  set_fact:
+    loopbackprefix_invalid: "{{ loopbackprefix|ipsubnet == loopbackprefix }}"
+    p2pprefix_invalid: "{{ p2pprefix|ipsubnet == p2pprefix }}"
+    p2pprefix_insufficient: "{{ (p2pprefix|ipaddr('size') / p2pprefix|ipsubnet(p2plength, 0)|ipaddr('size')) < (maxspines * leaves) }}"
+
+- name: Data Model Validation
+  run_once: True
+  assert:
+    that:
+      - "maxspines|int(-1) != -1"
+      - "leaves|int(-1) != -1"
+      - "spines|int(-1) != -1"
+      - "maxspines > 0"
+      - "spines > 0"
+      - "spines <= maxspines"
+      - "leaves > 0"
+      - "baseasn is defined"
+      - "p2plength <= 31"
+      - "leafprefix is defined"
+      - "spineprefix is defined"
+      - "firstuplink|int(-1) != -1"
+      - "firstuplink > 0"
+      - "loopbackint|int(-1) != -1"
+      - "loopbackint >= 0"
+      - "loopbackprefix_invalid != false"
+      - "p2pprefix_invalid != false"
+      - "p2pprefix_insufficient == false"
+    msg: "Validation Failed"
+
+#- name: Generate Device YAML File
+#  template:
+#    src: "infra-dm.j2"
+#    dest: "{{role_path}}/files/{{item}}.yml"
+#  loop: "{{ groups['switches'] }}"
+
+- name: Generate Device YAML File
+  template:
+    src: "infra-dm.j2"
+    dest: "{{role_path}}/files/{{inventory_hostname}}.yml"
+
+- name: Read Infra Data Model
+  include_vars:
+    file: "{{role_path}}/files/{{inventory_hostname}}.yml"
+    name: hostparams
+
+- name: Apply Config
+  eos_config:
+    #lines: "{{ lookup('file', '{{output}}/infra-{{inventory_hostname}}-config.txt') }}"
+    src: "infra-config.j2"
+    #provider: "{{ cli }}"
+    match: line
+
+- name: Leaf to k8s nodes bgp config
+  eos_config:
+    lines:
+      - "bgp listen range {{ rackprefixdata|ipsubnet(racklength, (inventory_hostname.split('-')[1]|int) - 1) }} peer-group K8S_{{inventory_hostname}} remote-as {{hostvars[inventory_hostname]['asn']}}"
+    match: line
+    parents: "router bgp {{hostvars[inventory_hostname]['asn']}}"
+  when: inventory_hostname | regex_search('^leaf')

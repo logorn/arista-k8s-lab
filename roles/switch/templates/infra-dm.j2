@@ -1,0 +1,7 @@
+#jinja2: lstrip_blocks: True
+---
+{% if inventory_hostname.startswith(spineprefix) %}
+{% include  "infra-spine.j2" %}
+{% else %}
+{% include "infra-leaf.j2" %}
+{% endif %}

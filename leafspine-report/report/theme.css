@@ -1,0 +1,38 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+.status-ok {
+	list-style-image: url('/static/img/status_circle_green.png');
+}
+
+.status-offline {
+	list-style-image: url('/static/img/status_diamond_red.png');
+}
+
+.status-disabled {
+	list-style-image: url('/static/img/status_diamond_black.png');
+}
+
+.status-disabled-avail {
+  list-style-image: url('/static/img/status_circle_black.png');
+}
+
+.status-nomon {
+	list-style-image: url('/static/img/status_square_blue.png');
+}

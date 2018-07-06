@@ -1,0 +1,3 @@
+---
+#apiserver_advertise_address: "{{ hostvars[inventory_hostname]['ansible_host'] if hostvars[inventory_hostname].has_key('ansible_host') else 0.0.0.0 }}"
+apiserver_advertise_address: "{{ hostvars[inventory_hostname]['ansible_host'] if 'ansible_host' in hostvars[inventory_hostname] else 0.0.0.0 }}"

@@ -1,0 +1,39 @@
+#jinja2: lstrip_blocks: True
+
+    <div class="page-header">
+    <h3>{{devparams.hostname}} (AS {{devparams.localas}})</h3>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Interface</th>
+                <th>Admin State</th>
+		<th>Interface State</th>
+		<th>Line Protocol State</th>
+                <th>IP Address</th>
+                <th>Peer IP </th>
+                <th>Peer AS</th>
+                <th>Peer State</th>
+                <th>Prefixes Rx</th>
+		<th>Peer Device</th>
+		<th>Peer Interface</th>
+            </tr>
+        </thead>
+        <tbody>
+			{% for peering in devparams.peerings %}
+            <tr>
+                <td>{{peering.interface}}</td>
+                <td>{{peering.enabled}}</td>
+                <td>{{peering.intstatus}}</td>
+                <td>{{peering.lpstatus}}</td>
+                <td>{{peering.ip}}</td>
+                <td>{{peering.peer}}</td>
+                <td>{{peering.remoteas}}</td>
+                <td>{{peering.peerstate}}</td>
+                <td>{{peering.prefixrx}}</td>
+                <td>{{peering.peerhost|default('None')}}</td>
+                <td>{{peering.peerport|default('None')}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>

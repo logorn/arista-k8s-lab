@@ -1,0 +1,6 @@
+---
+- name: Get calicoctl
+  get_url:
+    url: https://github.com/projectcalico/calicoctl/releases/download/v1.4.0/calicoctl
+    dest: /usr/local/bin/calicoctl
+    mode: 0755

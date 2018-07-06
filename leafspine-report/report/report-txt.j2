@@ -1,0 +1,6 @@
+#jinja2: lstrip_blocks: True
+{{ devparams.hostname }} (AS {{ devparams.localas }})
+
+{% for peering in devparams.peerings|dictsort %}
+{{ peering.interface }} {{ peering.enabled }} {{peering.ip}} {{peering.peer}} {{peering.remoteas}}
+{% endfor %}

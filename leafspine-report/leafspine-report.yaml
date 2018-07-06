@@ -1,0 +1,65 @@
+---
+- name: Leaf-Spine Topology Report
+  hosts: all
+  connection: local
+  gather_facts: False
+  vars:
+   - output: "{{playbook_dir}}/output"
+
+  tasks:
+    - name: Create Output Directory
+      tags:
+        - dataonly
+        - reportonly
+      run_once: True
+      file:
+        path: "{{ output }}"
+        state: directory
+
+    - name: Gather Data
+      tags:
+        - dataonly
+      register: routerdata
+      eos_command:
+        provider: "{{ cli }}"
+        commands:
+         - show ip bgp summary | json
+         - show ip int | json
+         - show lldp neighbors | json
+
+    - name: Fact Setting
+      tags:
+        - dataonly
+      set_fact:
+        bgppeers: "{{ routerdata.stdout[0].vrfs.default }}"
+        intips: "{{ routerdata.stdout[1].interfaces }}"
+        lldpnei: "{{ routerdata.stdout[2].lldpNeighbors }}"
+
+    - name: Generate Device YAML File
+      tags:
+        - dataonly
+      template:
+        src: "data-yml.j2"
+        dest: "{{output}}/{{inventory_hostname}}.yml"
+
+    - name: Read in Device YAML Data
+      tags:
+        - reportonly
+      include_vars:
+        file: "{{output}}/{{inventory_hostname}}.yml"
+        name: devparams
+
+    - name: Produce Report Sections
+      tags:
+        - reportonly
+      template:
+        src: "report/report-html.j2"
+        dest: "{{output}}/report-{{inventory_hostname}}.html"
+
+    - name: Combine Report Sections
+      run_once: True
+      tags:
+        - reportonly
+      template:
+        src: "report/report-html-parent.j2"
+        dest: "{{output}}/report.html"

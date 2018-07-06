@@ -1,0 +1,16 @@
+---
+loopbackaddr: 10.254.254.254/32
+asn: 64520
+interfaces:
+  - name: Ethernet2
+    description: "L1"
+    type: "uplink"
+    ip: 10.254.0.1/31
+    peerasn: 64521
+    peerip: 10.254.0.0
+  - name: Ethernet3
+    description: "L2"
+    type: "uplink"
+    ip: 10.254.0.9/31
+    peerasn: 64522
+    peerip: 10.254.0.8

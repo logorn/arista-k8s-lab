@@ -1,0 +1,5 @@
+cli:
+  host: "{{ ansible_host }}"
+  username: vagrant
+  password: vagrant
+  transport: cli

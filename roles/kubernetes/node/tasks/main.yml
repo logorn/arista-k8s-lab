@@ -1,0 +1,36 @@
+---
+- name: Check if kubeadm has already been bootsrapped
+  stat: path=/etc/kubernetes/pki/ca.crt
+  register: kubeinit_status
+
+- name: Join to Kubernetes cluster
+  when: not kubeinit_status.stat.exists
+  shell: |
+    kubeadm join --skip-preflight-checks \
+                 --token {{ token }} \
+                 {{ apiserver_ip }}:6443 \
+                 --discovery-token-unsafe-skip-ca-verification
+  register: join_cluster
+
+- name: Check if node ip is set
+  command: "grep -- '--node-ip=' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+  ignore_errors: True
+  register: nodeip_is_set
+  changed_when: False
+
+- name: Configure node ip
+  when: nodeip_is_set.rc != 0
+  replace:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^(Environment="KUBELET_KUBECONFIG_ARGS=)(.*)(")'
+    replace: '\1\2 --node-ip={{ hostvars[inventory_hostname]["ansible_host"] }}\3'
+    backup: yes
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_kubelet
+  when: join_cluster.changed

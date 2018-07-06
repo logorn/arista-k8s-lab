@@ -1,0 +1,21 @@
+#jinja2: lstrip_blocks: True
+interface Loopback{{ loopbackint }}
+   ip address {{ hostparams.loopbackaddr }}
+{% for interface in hostparams.interfaces %}
+interface {{ interface.name }}
+   no switchport
+   description {{ interface.description }}
+   ip address {{ interface.ip }}
+{% endfor %}
+ip routing
+router bgp {{ hostparams.asn }}
+   network {{ hostparams.loopbackaddr }}
+   maximum-paths {{ maxspines }}
+{% for interface in hostparams.interfaces %}
+{% if interface.type is equalto "uplink" %}
+   neighbor {{ interface.peerip }} remote-as {{ interface.peerasn }}
+   neighbor {{ interface.peerip }} update-source {{ interface.name }}
+{% else %}
+   network {{ interface.ip|ipaddr('network/prefix') }}
+{% endif %}
+{% endfor %}

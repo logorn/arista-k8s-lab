@@ -1,0 +1,67 @@
+---
+- name: Check if kubeadm has already been bootsrapped
+  stat: path=/etc/kubernetes/pki/ca.crt
+  register: kubeinit_status
+
+#- name: Reset Kubernetes component
+#  shell: "kubeadm reset"
+#  register: reset_cluster
+
+- debug:
+    msg: "Apiserver advertise address: {{apiserver_advertise_address}}"
+
+- name: Init Kubernetes master
+  when: not kubeinit_status.stat.exists
+  #when: reset_cluster is succeeded
+  shell: |
+    kubeadm init --service-cidr {{ service_cidr }} \
+                 --kubernetes-version {{ kube_version }} \
+                 --pod-network-cidr {{ pod_network_cidr }} \
+                 --token {{ token }} \
+                 --apiserver-advertise-address {{ apiserver_advertise_address }} \
+                 {{ kubeadm_opts }} \
+                 {{ init_opts }}
+  register: init_cluster
+
+- name: Create Kubernetes config directory
+  become: False
+  file: path="~/.kube/" state=directory
+
+- name: Change permissions of .kube/config
+  file: path=/etc/kubernetes/admin.conf mode=0775
+
+- name: Copy admin.conf to Home directory
+  when: init_cluster and ansible_user is defined
+  become: False
+  copy:
+    src: "{{ kubeadmin_config }}"
+    dest: "~/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
+    remote_src: True
+
+- name: Check if node ip is set
+  command: "grep -- '--node-ip=' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+  ignore_errors: True
+  register: nodeip_is_set
+  changed_when: False
+
+- name: Configure node ip
+  when: nodeip_is_set.rc != 0
+  replace:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    regexp: '^(Environment="KUBELET_KUBECONFIG_ARGS=)(.*)(")'
+    replace: '\1\2 --node-ip={{ apiserver_advertise_address }}\3'
+    backup: yes
+
+- name: Enable and restart kubelet engine
+  when: not kubeinit_status.stat.exists
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  notify:
+  - "Deploy kubernetes dashboard into cluster"
+  register: started_kubelet
