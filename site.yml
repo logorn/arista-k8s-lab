@@ -11,6 +11,13 @@
   roles:
     - switch
 
+- name: Python minimal
+  gather_facts: no
+  become: yes
+  hosts: servers
+  roles:
+    - { role: common-mutable/py-minimal }
+
 - name: Docker for k8s node
   gather_facts: no
   become: yes

@@ -133,5 +133,5 @@
   shell: "kubectl get pod -n kube-system calicoctl -o go-template --template='{{'{{'}}.status.phase{{'}}'}}' || true"
   register: cresult
   until: cresult.stdout.find("Running") != -1
-  retries: 5
+  retries: 10
   delay: 10

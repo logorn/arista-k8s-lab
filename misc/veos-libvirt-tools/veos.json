@@ -1,0 +1,15 @@
+{
+  "name": "arista/veos",
+  "description": "Arista vEOS",
+  "versions": [
+    {
+      "version": "4.20.7M-qwt11",
+      "providers": [
+        {
+          "name": "libvirt",
+          "url": "file:///space/products/k8s-netlab/vEOS-lab-4.20.7M-combined.box"
+        }
+      ]
+    }
+  ]
+}

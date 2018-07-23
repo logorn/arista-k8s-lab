@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
 {% include "header.html" %}
-{% for device in hostvars[inventory_hostname].groups.all %}
+{% for device in hostvars[inventory_hostname].groups['switches'] %}
 {% include "output/report-" ~ device ~ ".html" %}
 {% endfor %}
 {% include "footer.html" %}

@@ -1,11 +1,13 @@
 ---
 - name: Set Validation Facts
+  connection: local
   set_fact:
     loopbackprefix_invalid: "{{ loopbackprefix|ipsubnet == loopbackprefix }}"
     p2pprefix_invalid: "{{ p2pprefix|ipsubnet == p2pprefix }}"
     p2pprefix_insufficient: "{{ (p2pprefix|ipaddr('size') / p2pprefix|ipsubnet(p2plength, 0)|ipaddr('size')) < (maxspines * leaves) }}"
 
 - name: Data Model Validation
+  connection: local
   run_once: True
   assert:
     that:
@@ -36,20 +38,29 @@
 #  loop: "{{ groups['switches'] }}"
 
 - name: Generate Device YAML File
+  connection: local
   template:
     src: "infra-dm.j2"
     dest: "{{role_path}}/files/{{inventory_hostname}}.yml"
 
 - name: Read Infra Data Model
+  connection: local
   include_vars:
     file: "{{role_path}}/files/{{inventory_hostname}}.yml"
     name: hostparams
+
+- name: Clear persistent connection
+  connection: local
+  file:
+    state: absent
+    path: "~/.ansible/pc/.ansible_pc_lock_{{ hostvars[inventory_hostname]['ansible_host'] }}"
+  changed_when: False
+  ignore_errors: True
 
 - name: Apply Config
   eos_config:
     #lines: "{{ lookup('file', '{{output}}/infra-{{inventory_hostname}}-config.txt') }}"
     src: "infra-config.j2"
-    #provider: "{{ cli }}"
     match: line
 
 - name: Leaf to k8s nodes bgp config

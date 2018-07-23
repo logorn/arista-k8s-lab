@@ -1,0 +1,7 @@
+---
+
+- name: Install python-minimal
+  when: ansible_os_family == "Debian"
+  raw: (test -e /usr/bin/python && echo '0') || (apt -y update && apt install -y python-minimal)
+  register: pymin_status
+  changed_when: False

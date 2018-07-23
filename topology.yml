@@ -1,20 +1,35 @@
 ---
 - name: spine-1
-  box: vEOS-lab-4.19.7M-virtualbox.box
+  ram: 2048
+  box:
+    vbox: vEOS-lab-4.19.7M-virtualbox.box
+    libvirtbox: arista/veos
+#    libvirtbox: vEOS-lab-4.20.7M-combined.box
+    libvirtbox_version: 4.20.7M-qwt11
   links:
     - name: mgmt
       ip:   10.0.5.10
     - name: S1L1
     - name: S1L2
 - name: leaf-1
-  box: vEOS-lab-4.19.7M-virtualbox.box
+  ram: 2048
+  box:
+    vbox: vEOS-lab-4.19.7M-virtualbox.box
+    libvirtbox: arista/veos
+#    libvirtbox: vEOS-lab-4.20.7M-combined.box
+    libvirtbox_version: 4.20.7M-qwt11
   links:
     - name: mgmt
       ip:   10.0.5.11
     - name: S1L1
     - name: RACK1-DATA
 - name: leaf-2
-  box: vEOS-lab-4.19.7M-virtualbox.box
+  ram: 2048
+  box:
+    vbox: vEOS-lab-4.19.7M-virtualbox.box
+    libvirtbox: arista/veos
+#    libvirtbox: vEOS-lab-4.20.7M-combined.box
+    libvirtbox_version: 4.20.7M-qwt11
   links:
     - name: mgmt
       ip:   10.0.5.12
@@ -22,7 +37,9 @@
     - name: RACK2-DATA
 - name: k8s-master-001
   ram: 2048
-  box: bento/ubuntu-16.04
+  box:
+    vbox: bento/ubuntu-16.04
+    libvirtbox: generic/ubuntu1604
   links:
     - name: mgmt
       ip: 10.0.5.100
@@ -30,7 +47,9 @@
       ip: 10.100.0.1
 - name: k8s-worker-001
   ram: 2048
-  box: bento/ubuntu-16.04
+  box:
+    vbox: bento/ubuntu-16.04
+    libvirtbox: generic/ubuntu1604
   links:
     - name: mgmt
       ip: 10.0.5.101
@@ -38,7 +57,9 @@
       ip: 10.100.0.2
 - name: k8s-worker-002
   ram: 2048
-  box: bento/ubuntu-16.04
+  box:
+    vbox: bento/ubuntu-16.04
+    libvirtbox: generic/ubuntu1604
   links:
     - name: mgmt
       ip: 10.0.5.102
@@ -46,7 +67,9 @@
       ip: 10.100.1.1
 - name: nms
   ram: 512
-  box: bento/ubuntu-16.04
+  box:
+    vbox: bento/ubuntu-16.04
+    libvirtbox: generic/ubuntu1604
   links:
     - name: mgmt
       ip:   10.0.5.254

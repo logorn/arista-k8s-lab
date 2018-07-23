@@ -8,26 +8,27 @@
 
   tasks:
     - name: Create Output Directory
+      when: inventory_hostname | regex_search('^nms$')
       tags:
         - dataonly
         - reportonly
-      run_once: True
       file:
         path: "{{ output }}"
         state: directory
 
     - name: Gather Data
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - dataonly
       register: routerdata
       eos_command:
-        provider: "{{ cli }}"
         commands:
          - show ip bgp summary | json
          - show ip int | json
          - show lldp neighbors | json
 
     - name: Fact Setting
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - dataonly
       set_fact:
@@ -36,6 +37,7 @@
         lldpnei: "{{ routerdata.stdout[2].lldpNeighbors }}"
 
     - name: Generate Device YAML File
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - dataonly
       template:
@@ -43,6 +45,7 @@
         dest: "{{output}}/{{inventory_hostname}}.yml"
 
     - name: Read in Device YAML Data
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - reportonly
       include_vars:
@@ -50,6 +53,7 @@
         name: devparams
 
     - name: Produce Report Sections
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - reportonly
       template:
@@ -57,7 +61,7 @@
         dest: "{{output}}/report-{{inventory_hostname}}.html"
 
     - name: Combine Report Sections
-      run_once: True
+      when: inventory_hostname | regex_search('^(?:leaf|spine)')
       tags:
         - reportonly
       template:

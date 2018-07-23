@@ -1,4 +1,4 @@
-#jinja2: lstrip_blocks: True
+#jinja2: lstrip_blocks: False
 interface Loopback{{ loopbackint }}
    ip address {{ hostparams.loopbackaddr }}
 {% for interface in hostparams.interfaces %}

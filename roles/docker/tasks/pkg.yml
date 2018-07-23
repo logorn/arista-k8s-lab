@@ -1,4 +1,5 @@
 ---
+
 - name: Install apt-transport-https
   when: ansible_os_family == "Debian"
   apt:

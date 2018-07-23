@@ -45,6 +45,12 @@ hosts = YAML.load_file(vagrant_root + '/topology.yml')
 
 # Lab definition begins here
 Vagrant.configure(VAGRANTFILE_API_VER) do |config|
+
+  config.vm.provider "libvirt"
+  config.vm.provider "virtualbox"
+
+  config.vm.boot_timeout = 600
+
   config.vbguest.auto_update = false
 
   # Iterate through entries in YAML file
@@ -52,10 +58,44 @@ Vagrant.configure(VAGRANTFILE_API_VER) do |config|
 
     config.vm.define host["name"] do |srv|
 
+      script = ""
+
+      config.ssh.insert_key = false
+
       args = Array.new
       args.push(host["name"])
 
-      srv.vm.box = host["box"]
+      srv.vm.provider :libvirt do |libvirt, override|
+
+        override.vm.box = host["box"]["libvirtbox"]
+        override.vm.box_version = host["box"]["libvirtbox_version"]
+        if /nms/.match(host['name'])
+          override.vm.synced_folder '.', '/vagrant', disabled: false
+        else
+          if /(?i:veos)/.match(host['box']['vbox'])
+            override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
+            libvirt.disk_bus = 'ide'
+            libvirt.cpus = 1
+
+            script += <<-SCRIPT
+bash sudo su || bash -c 'sudo su'
+SCRIPT
+          end
+        end
+
+        if host.key?("ram")
+          libvirt.memory = host["ram"]
+        end
+      end
+
+      srv.vm.provider :virtualbox do |v, override|
+        override.vm.box = host["box"]["vbox"]
+
+        if host.key?("ram")
+          v.memory = host["ram"]
+        end
+      end
+
       if host.key?("forwarded_ports")
         host["forwarded_ports"].each do |port|
           srv.vm.network :forwarded_port, guest: port["guest"], host: port["host"], id: port["name"]
@@ -68,39 +108,57 @@ Vagrant.configure(VAGRANTFILE_API_VER) do |config|
             if link['name'] == "mgmt"
               $mgmtip = link["ip"]
             end
-            ipaddr = "169.254.1.11"
-            srv.vm.network "private_network", virtualbox__intnet: link["name"], ip: (link.key?("ip") ? link["ip"] : ipaddr), auto_config: (/vEOS/.match(host['box']) ? false : true)
+
+            srv.vm.provider :libvirt do |libvirt, ov|
+              ov.vm.network "private_network",
+                libvirt__network_name: link["name"],
+                ip: (link.key?("ip") ? link["ip"] : "169.254.1.11"),
+                libvirt__forward_mode: "veryisolated",
+                auto_config: (/(?i:veos)/.match(host['box']['vbox']) ? false : true),
+                libvirt_dhcp_enabled: false,
+                dhcp_enabled: false,
+                libvirt__mtu: 1500,
+                model_type: "e1000"
+            end
+
+            srv.vm.provider :virtualbox do |v, ov|
+              ov.vm.network "private_network",
+                virtualbox__intnet: link["name"],
+                ip: (link.key?("ip") ? link["ip"] : "169.254.1.11"),
+                auto_config: (/(?i:veos)/.match(host['box']['vbox']) ? false : true)
+            end
           end
         end
       end
 
-      script = <<-SCRIPT
+      script += <<-SCRIPT
 export DEBIAN_FRONTEND=noninteractive
 cp /etc/hosts /tmp/hosts
 cat /tmp/hosts | /bin/sed 's/vagrant/'#{host['name']}'/g' > /etc/hosts
+cp /etc/hosts /tmp/hosts
+cat /tmp/hosts | /bin/sed 's/ubuntu1604\.localdomain/'#{host['name']}'/g' > /etc/hosts
 if [ -f /vagrant/ssh-config ]; then
   mkdir -p /home/vagrant/.ssh
   cp /vagrant/ssh-config /home/vagrant/.ssh/config
 fi
 SCRIPT
 
-      if /vEOS/.match(host['box'])
+      if /(?i:veos)/.match(host['box']['vbox'])
         script += <<-SCRIPT
 FastCli -p 15 -c "configure
 hostname $1
 vrf definition MGMT
 rd 1:1
-interface Eth1
+interface Ethernet1
 no switchport
-no shutdown
 vrf forwarding MGMT
-ip address $2 255.255.255.0"
+ip address $2 255.255.255.0
+wr mem"
 SCRIPT
 
         args.push($mgmtip)
       else
         script += <<-SCRIPT
-echo $1
 hostnamectl set-hostname $1
 SCRIPT
       end
@@ -113,18 +171,14 @@ apt-get update
 apt-get install ansible -y
 apt-get install python-pip -y
 pip install ntc-ansible
+echo "Installation completed..."
 cd /vagrant
 ansible-playbook ./site.yml
 SCRIPT
       end
 
-      if host.key?("ram")
-        config.vm.provider "virtualbox" do |v|
-          v.memory = host["ram"]
-        end
-      end
-
       srv.vm.provision "shell" do |s|
+        s.privileged = /(?i:veos)/.match(host['box']['vbox']) ? false : true
         s.inline = script
         s.args = args
       end
