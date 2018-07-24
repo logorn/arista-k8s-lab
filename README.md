@@ -4,7 +4,7 @@ Aim of the project is to create a kubernetes cluster self-contained into a local
 
 Advantage of the solution is to reproduce locally a production grade networking.
 
-This lab creates a simple spine-leaf architecture with virtual veos virtual machines.
+This lab creates a simple spine-leaf architecture with veos virtual machines.
 
 You will have:
 * One spine
@@ -26,9 +26,18 @@ The K8S network SDN is a calico full l3 solution ensuring pod networking.
 
 ## Launch the lab:
 
-Please register on arista website and download the following arista veos virtualbox image on arista website: vEOS-lab-4.19.7M-virtualbox.box
+Please register on Arista website and download the following Arista veos virtualbox image on Arista website: vEOS-lab-4.19.7M-virtualbox.box
 
-Copy it at project root.
-Launch and provision the lab using: vagrant up
+For libvirt, you should build your own box from the combined vmdk distributed by Arista. We did not succeed trying to run 4.19.7M image with libvirt (kernel panic), so we chose to use 4.20.7M
 
-* Enjoy :)
+Copy working image at project root.
+
+### With virtualbox
+
+* vagrant up --provider virtualbox
+
+### With libvirt
+
+* vagrant up spine-1 leaf-1 leaf-2 --provider libvirt --parallel
+* vagrant up k8s-master-001 k8s-worker-001 k8s-worker-002 --provider libvirt --parallel
+* vagrant up nms

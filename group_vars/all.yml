@@ -13,13 +13,8 @@ kubeadm_opts: ""
 
 service_subnet: 10.96.0
 service_cidr: "{{ service_subnet }}.0/12"
-dns_name: cluster.local
-dns_ip: "{{ service_subnet }}.10"
 
-# Network implementation('flannel', 'calico')
-network: calico
 pod_network_cidr: "10.101.0.0/16"
-cni_opts: "interface=eth1" # flannel: --iface=eth1, calico: interface=eth1
 
 enable_dashboard: yes
 
@@ -29,8 +24,6 @@ insecure_registrys: ""
 
 systemd_dir: /lib/systemd/system
 system_env_dir: /etc/sysconfig
-network_dir: /etc/kubernetes/network
 kubeadmin_config: /etc/kubernetes/admin.conf
-kube_addon_dir: /etc/kubernetes/addon
 
 node_bit_mask: 24
