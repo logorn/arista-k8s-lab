@@ -65,7 +65,7 @@
       ip: 10.0.5.102
     - name: RACK2-DATA
       ip: 10.100.1.1
-- name: nms
+- name: provisioner
   ram: 512
   box:
     vbox: bento/ubuntu-16.04

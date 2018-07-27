@@ -40,4 +40,4 @@ Copy working image at project root.
 
 * vagrant up spine-1 leaf-1 leaf-2 --provider libvirt --parallel
 * vagrant up k8s-master-001 k8s-worker-001 k8s-worker-002 --provider libvirt --parallel
-* vagrant up nms
+* vagrant up provisioner

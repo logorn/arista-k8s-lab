@@ -22,7 +22,7 @@ all:
         ansible_become_pass: vagrant
     servers:
       hosts:
-        nms:
+        provisioner:
           records_config:
             #- "LOCAL proxy.local.outgoing_ip_to_bind STRING {{ .publicip }}"
             - "LOCAL proxy.local.incoming_ip_to_bind STRING 10.0.5.254"

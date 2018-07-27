@@ -69,7 +69,7 @@ Vagrant.configure(VAGRANTFILE_API_VER) do |config|
 
         override.vm.box = host["box"]["libvirtbox"]
         override.vm.box_version = host["box"]["libvirtbox_version"]
-        if /nms/.match(host['name'])
+        if /provisioner/.match(host['name'])
           override.vm.synced_folder '.', '/vagrant', disabled: false
         else
           if /(?i:veos)/.match(host['box']['vbox'])
@@ -164,7 +164,7 @@ hostnamectl set-hostname $1
 SCRIPT
       end
 
-      if /nms/.match(host['name'])
+      if /provisioner/.match(host['name'])
         script += <<-SCRIPT
 apt-get install software-properties-common -y
 apt-add-repository ppa:ansible/ansible -y

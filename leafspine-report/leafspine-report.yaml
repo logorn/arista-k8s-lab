@@ -8,7 +8,7 @@
 
   tasks:
     - name: Create Output Directory
-      when: inventory_hostname | regex_search('^nms$')
+      when: inventory_hostname | regex_search('^provisioner$')
       tags:
         - dataonly
         - reportonly
