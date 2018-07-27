@@ -1,0 +1,8 @@
+{% if icp_config is none %}
+{% elif icp_config is string %}
+{{ icp_config }}
+{% else %}
+{% for i in range(icp_config | length) %}
+{{ icp_config[i] }}
+{% endfor %}
+{% endif %}

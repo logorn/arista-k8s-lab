@@ -1,0 +1,20 @@
+- set_fact:
+    is_vagrant: "{{ lookup('env', 'VAGRANT') }}"
+
+- name: Eth1 ip
+  shell: "ip addr show eth1 | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*'"
+  register: vagrant_mgt_host_ip
+  changed_when: False
+  when: is_vagrant
+
+- name: Remove vagrant default route
+  shell: ip r delete default via 10.0.2.2
+  changed_when: False
+  ignore_errors: True
+  when: is_vagrant
+
+- name: Add new default
+  shell: "ip r add default via {{ vagrant_mgt_host_ip.stdout }}"
+  changed_when: False
+  ignore_errors: True
+  when: is_vagrant

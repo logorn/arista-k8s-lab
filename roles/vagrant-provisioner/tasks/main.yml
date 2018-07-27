@@ -1,0 +1,42 @@
+- set_fact:
+    is_vagrant: "{{ lookup('env', 'VAGRANT') }}"
+
+- name: Create .profile.d directory
+  file:
+    path: "{{item}}/.profile.d"
+    state: directory
+    mode: 0755
+  with_items:
+    - "~"
+    - "/home/vagrant"
+  when: is_vagrant
+
+- name: Create VAGRANT env var
+  blockinfile:
+    create: yes
+    path:  "{{item}}/.profile.d/env"
+    block: |
+      export VAGRANT=1
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+  with_items:
+    - "~"
+    - "/home/vagrant"
+  when: is_vagrant
+
+- name: Source ~/.profile.d/*
+  blockinfile:
+    path:  "{{item}}/.profile"
+    block: |
+      if [ -d ~/.profile.d ]; then
+        for i in ~/.profile.d/*; do
+          if [ -r $i ]; then
+            . $i
+          fi
+        done
+        unset i
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+  with_items:
+    - "~"
+    - "/home/vagrant"
+  when: is_vagrant

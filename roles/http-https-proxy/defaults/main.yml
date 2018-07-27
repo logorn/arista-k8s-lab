@@ -1,0 +1,31 @@
+---
+
+cache_config:
+cluster_config:
+  - "0"
+congestion_config:
+hosting_config:
+icp_config:
+ip_allow_config:
+  - "src_ip=127.0.0.1                                  action=ip_allow method=ALL"
+  - "src_ip=::1                                        action=ip_allow method=ALL"
+  - "# Deny PURGE, DELETE, and PUSH for all (this implies allow other methods for all)"
+  - "src_ip=0.0.0.0-255.255.255.255                    action=ip_deny  method=PUSH|PURGE|DELETE"
+  - "src_ip=::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff action=ip_deny  method=PUSH|PURGE|DELETE"
+log_hosts_config:
+parent_config:
+plugin_config:
+records_config:
+remap_config:
+socks_config:
+  - "no_socks   123.14.15.1 - 123.14.17.4, 113.14.18.2"
+  - "no_socks   123.14.30.1 - 123.14.63.4, 122.43.15.2"
+  - "no_socks   123.14.84.1 - 123.14.89.4, 109.32.15.2"
+splitdns_config:
+ssl_multicert_config:
+storage_config:
+  - "/var/cache/trafficserver 256M"
+vaddrs_config:
+volume_config:
+header_rewrite_conf:
+logfile_dir: "/var/log"

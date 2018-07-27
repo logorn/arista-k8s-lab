@@ -133,6 +133,7 @@ SCRIPT
 
       script += <<-SCRIPT
 export DEBIAN_FRONTEND=noninteractive
+export VAGRANT=1
 cp /etc/hosts /tmp/hosts
 cat /tmp/hosts | /bin/sed 's/vagrant/'#{host['name']}'/g' > /etc/hosts
 cp /etc/hosts /tmp/hosts

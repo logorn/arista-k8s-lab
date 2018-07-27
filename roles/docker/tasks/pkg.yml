@@ -1,15 +1,20 @@
 ---
 
+- set_fact:
+    proxy_conf: "{{proxy_env if proxy_env is defined else '{\"http_proxy\": \"\", \"https_proxy\": \"\"}'}}"
+
 - name: Install apt-transport-https
   when: ansible_os_family == "Debian"
   apt:
     name: "apt-transport-https"
     state: present
+  environment: "{{proxy_conf}}"
 
 - name: Add Docker APT GPG key
   when: ansible_os_family == "Debian"
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
+  environment: "{{proxy_conf}}"
 
 - name: Add Docker APT repository
   when: ansible_os_family == "Debian"
@@ -41,6 +46,7 @@
     update_cache: yes
     name: "docker-ce={{ docker_version }}*"
     state: present
+  environment: "{{proxy_conf}}"
 
 - name: Hold docker version
   when: ansible_os_family == "Debian"

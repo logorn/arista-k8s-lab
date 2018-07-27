@@ -1,0 +1,8 @@
+{% if records_config is none %}
+{% elif records_config is string %}
+{{ records_config }}
+{% else %}
+{% for i in range(records_config | length) %}
+{{ records_config[i] }}
+{% endfor %}
+{% endif %}

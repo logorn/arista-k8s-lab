@@ -1,0 +1,9 @@
+---
+
+- name: Configure apt cache proxy
+  copy:
+    content: |
+      Acquire::http::Proxy "{{proxy_env.http_proxy}}";
+      
+    dest: /etc/apt/apt.conf.d/90apt-proxy
+  when:  proxy_env is defined and proxy_env.http_proxy is defined and proxy_env.http_proxy != ""

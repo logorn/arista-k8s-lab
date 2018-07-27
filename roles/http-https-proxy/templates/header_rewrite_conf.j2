@@ -1,0 +1,8 @@
+{% if header_rewrite_conf is none %}
+{% elif header_rewrite_conf is string %}
+{{ header_rewrite_conf }}
+{% else %}
+{% for i in range(header_rewrite_conf | length) %}
+{{ header_rewrite_conf[i] }}
+{% endfor %}
+{% endif %}
