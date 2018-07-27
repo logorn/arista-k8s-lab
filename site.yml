@@ -1,7 +1,7 @@
 ---
-- name: Prepare nms
+- name: Prepare provisioner
   gather_facts: yes
-  hosts: nms
+  hosts: provisioner
   roles:
     - vagrant-provisioner
     - http-https-proxy

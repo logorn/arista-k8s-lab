@@ -17,7 +17,7 @@ The final 3 plays read in the YAML data, produce HTML snippets using Jinja2 temp
 The finals 3 plays can be ran seperately on the existing YAML files by using an ansible tag:
 
 ~~~~
-vagrant@nms:/vagrant/leafspine-report$ ansible-playbook leafspine-report.yaml --tags reportonly
+vagrant@provisioner:/vagrant/leafspine-report$ ansible-playbook leafspine-report.yaml --tags reportonly
 
 PLAY [Leaf-Spine Topology Report] **********************************************
 
