@@ -22,8 +22,12 @@ enable_dashboard: yes
 insecure_registrys: ""
 # insecure_registrys: ['gcr.io']
 
-systemd_dir: /lib/systemd/system
+systemd_dir: /etc/systemd/system
 system_env_dir: /etc/sysconfig
 kubeadmin_config: /etc/kubernetes/admin.conf
 
 node_bit_mask: 24
+
+proxy_env:
+  http_proxy: http://10.0.5.254:8080
+  https_proxy: http://10.0.5.254:8080

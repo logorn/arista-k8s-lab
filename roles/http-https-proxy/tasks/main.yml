@@ -1,0 +1,84 @@
+---
+
+- name: Install trafficserver
+  register: install_trafficserver
+  include_tasks: pkg.yml
+
+- name: Generate cache config
+  template: src=cache_config.j2 dest=/etc/trafficserver/cache.config
+  register: conf1
+
+- name: Generate cluster config
+  template: src=cluster_config.j2 dest=/etc/trafficserver/cluster.config
+  register: conf2
+
+- name: Generate congestion config
+  template: src=congestion_config.j2 dest=/etc/trafficserver/congestion.config
+  register: conf3
+
+- name: Generate header rewrite conf
+  template: src=header_rewrite_conf.j2 dest=/etc/trafficserver/header_rewrite.conf
+  register: conf4
+
+- name: Generate hosting config
+  template: src=hosting_config.j2 dest=/etc/trafficserver/hosting.config
+  register: conf5
+
+- name: Generate icp config
+  template: src=icp_config.j2 dest=/etc/trafficserver/icp.config
+  register: conf6
+
+- name: Generate logging config
+  template: src=logging_config.j2 dest=/etc/trafficserver/logging.config
+  register: conf7
+
+- name: Generate log hosts config
+  template: src=log_hosts_config.j2 dest=/etc/trafficserver/log_hosts.config
+  register: conf8
+
+- name: Generate metrics config
+  template: src=metrics_config.j2 dest=/etc/trafficserver/metrics.config
+  register: conf9
+
+- name: Generate parent config
+  template: src=parent_config.j2 dest=/etc/trafficserver/parent.config
+  register: conf10
+
+- name: Generate plugin config
+  template: src=plugin_config.j2 dest=/etc/trafficserver/plugin.config
+  register: conf11
+
+- name: Generate records config
+  template: src=records_config.j2 dest=/etc/trafficserver/records.config
+  register: conf12
+
+- name: Generate remap config
+  template: src=remap_config.j2 dest=/etc/trafficserver/remap.config
+  register: conf13
+
+- name: Generate socks config
+  template: src=socks_config.j2 dest=/etc/trafficserver/socks.config
+  register: conf14
+
+- name: Generate splitdns config
+  template: src=splitdns_config.j2 dest=/etc/trafficserver/splitdns.config
+  register: conf15
+
+- name: Generate ssl multicert config
+  template: src=ssl_multicert_config.j2 dest=/etc/trafficserver/ssl_multicert.config
+  register: conf16
+
+- name: Generate vaddrs config
+  template: src=vaddrs_config.j2 dest=/etc/trafficserver/vaddrs.config
+  register: conf17
+
+- name: Generate volume config
+  template: src=volume_config.j2 dest=/etc/trafficserver/volume.config
+  register: conf18
+
+- name: restart service trafficserver on conf changes
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: trafficserver
+  when: install_trafficserver.changed or conf1.changed or conf2.changed or conf3.changed or conf4.changed or conf5.changed or conf6.changed or conf7.changed or conf8.changed or conf9.changed or conf10.changed or conf11.changed or conf12.changed or conf13.changed or conf14.changed or conf15.changed or conf16.changed or conf17.changed or conf18.changed

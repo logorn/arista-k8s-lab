@@ -1,10 +1,14 @@
 ---
 
+- set_fact:
+    proxy_conf: "{{proxy_env if proxy_env is defined else '{\"http_proxy\": \"\", \"https_proxy\": \"\"}'}}"
+
 - name: Add Kubernetes APT GPG key
   when: ansible_os_family == "Debian"
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     state: present
+  environment: "{{proxy_conf}}"
 
 - name: Add Kubernetes APT repository
   when: ansible_os_family == "Debian"
@@ -36,3 +40,4 @@
     name: "{{ item }}"
     update_cache: yes
   with_items: "{{ pkgs }}"
+  environment: "{{proxy_conf}}"

@@ -1,8 +1,10 @@
 ---
-- name: Add host keys on applying node
+- name: Prepare nms
   gather_facts: yes
   hosts: nms
   roles:
+    - vagrant-provisioner
+    - http-https-proxy
     - gather-ssh-keys
 
 - name: Configure switching infrastructure
@@ -10,6 +12,20 @@
   hosts: switches
   roles:
     - switch
+
+- name: Apt proxy
+  gather_facts: no
+  become: yes
+  hosts: kubernetes
+  roles:
+    - apt-proxy
+
+- name: Vagrant remove df route
+  gather_facts: no
+  become: yes
+  hosts: kubernetes
+  roles:
+    - vagrant
 
 - name: Python minimal
   gather_facts: no
@@ -46,7 +62,7 @@
     K8S_AUTH_KUBECONFIG: /etc/kubernetes/admin.conf
     KUBECONFIG: /etc/kubernetes/admin.conf
   roles:
-    - { role: kubernetes/rscreator }
+    - { role: kubernetes/calico-rscreator }
 
 - name: Calicoctl
   become: yes

@@ -1,0 +1,23 @@
+#
+# plugin.config
+#
+# Documentation:
+#    https://docs.trafficserver.apache.org/en/latest/admin-guide/files/plugin.config.en.html
+#
+# Comments start with a '#' and continue to the end of the line
+# Blank lines are ignored
+#
+# test-plugin.so arg1 arg2 arg3
+#
+# Example:
+#inktomi/iwx/iwx.so
+#inktomi/abuse/abuse.so etc/trafficserver/abuse.config
+#inktomi/icx/icx.so etc/trafficserver/icx.config
+{% if plugin_config is none %}
+{% elif plugin_config is string %}
+{{ plugin_config }}
+{% else %}
+{% for i in range(plugin_config | length) %}
+{{ plugin_config[i] }}
+{% endfor %}
+{% endif %}

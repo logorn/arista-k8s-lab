@@ -1,0 +1,8 @@
+---
+
+- name: Install trafficserver (Debian/Ubuntu)
+  when: ansible_os_family == "Debian"
+  apt:
+    update_cache: yes
+    name: "trafficserver"
+    state: present

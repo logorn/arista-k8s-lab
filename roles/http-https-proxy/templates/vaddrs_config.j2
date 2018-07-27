@@ -1,0 +1,30 @@
+# Virtual IP Address Configuration
+#
+# The purpose of this file is to specify virtual IP addresses
+# for Traffic Server. This DOES NOT actually bind to these
+# addresses; ATS either listens to all or the address specified
+# through proxy.local.incoming_ip_to_bind.
+#
+# The vips specified here will be verified and broadcast across
+# the cluster. Any conflicts will be logged as errors.
+#
+# In order to enable these checks you must also set:
+#     CONFIG proxy.config.vmap.enabled INT 1
+# In records.conf
+#
+# UNIX
+#   Format:
+#     <virtual IP address> <interface> <sub-interface>
+#
+#   Example:
+#     209.1.33.10 hme0 10
+#     209.1.33.11 hme0 11
+#
+{% if vaddrs_config is none %}
+{% elif vaddrs_config is string %}
+{{ vaddrs_config }}
+{% else %}
+{% for i in range(vaddrs_config | length) %}
+{{ vaddrs_config[i] }}
+{% endfor %}
+{% endif %}
