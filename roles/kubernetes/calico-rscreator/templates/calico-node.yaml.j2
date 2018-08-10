@@ -1,6 +1,7 @@
 # This manifest installs the calico/node container, as well
 # as the Calico CNI plugins and network config on
 # each master and worker node in a Kubernetes cluster.
+{% set nodenetmask = hostvars[nodename]['nodeip'] + "/" + node_mask %}
 kind: DaemonSet
 apiVersion: extensions/v1beta1
 metadata:
@@ -95,7 +96,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: IP
-              value: "{{hostvars[nodename]['nodeip']}}/{{node_bit_mask}}"
+              value: "{{ nodenetmask | ipaddr('net') }}"
             - name: FELIX_HEALTHENABLED
               value: "true"
             - name: IP_AUTODETECTION_METHOD

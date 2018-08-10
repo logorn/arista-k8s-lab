@@ -2,7 +2,7 @@
     is_vagrant: "{{ lookup('env', 'VAGRANT') }}"
 
 - name: Eth1 ip
-  shell: "ip addr show eth1 | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*'"
+  shell: "ip addr show {{ mgmt_interface }} | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*'"
   register: vagrant_mgt_host_ip
   changed_when: False
   when: is_vagrant

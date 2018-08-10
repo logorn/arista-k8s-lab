@@ -26,8 +26,15 @@ systemd_dir: /etc/systemd/system
 system_env_dir: /etc/sysconfig
 kubeadmin_config: /etc/kubernetes/admin.conf
 
-node_bit_mask: 24
+mgmt_interface: "eth1"
+
+mgmt_mask: "255.255.255.0"
+node_mask: "255.255.255.0"
+
+provisioner: "10.0.5.254"
+dhcp_start_index: "150"
+dhcp_end_index: "200"
 
 proxy_env:
-  http_proxy: http://10.0.5.254:8080
-  https_proxy: http://10.0.5.254:8080
+  http_proxy: "http://{{ provisioner }}:8080"
+  https_proxy: "http://{{ provisioner }}:8080"

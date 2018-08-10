@@ -25,7 +25,7 @@ all:
         provisioner:
           records_config:
             #- "LOCAL proxy.local.outgoing_ip_to_bind STRING {{ .publicip }}"
-            - "LOCAL proxy.local.incoming_ip_to_bind STRING 10.0.5.254"
+            - "LOCAL proxy.local.incoming_ip_to_bind STRING {{ provisioner }}"
             #- "CONFIG proxy.config.log.logfile_dir STRING {{.logfile_dir}}"
             - "CONFIG proxy.config.http.connect_ports STRING 80 443 2195 8083 5222"
             - "CONFIG proxy.config.url_remap.remap_required INT 0"
@@ -120,6 +120,7 @@ all:
             master:
               hosts:
                 k8s-master-001:
+                  mac: 16189C195059
                   ansible_host: 10.0.5.100
                   toras: 64521
                   torpeerip: 10.100.0.254
@@ -127,11 +128,13 @@ all:
             worker:
               hosts:
                 k8s-worker-001:
+                  mac: 16189C127A5F
                   ansible_host: 10.0.5.101
                   toras: 64521
                   torpeerip: 10.100.0.254
                   nodeip: 10.100.0.2
                 k8s-worker-002:
+                  mac: 16189C1BB228
                   ansible_host: 10.0.5.102
                   toras: 64522
                   torpeerip: 10.100.1.254
