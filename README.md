@@ -39,5 +39,5 @@ Copy working image at project root.
 ### With libvirt
 
 * vagrant up spine-1 leaf-1 leaf-2 --provider libvirt --parallel
-* vagrant up k8s-master-001 k8s-worker-001 k8s-worker-002 --provider libvirt --parallel
 * vagrant up provisioner
+* vagrant up k8s-master-001 k8s-worker-001 k8s-worker-002 --provider libvirt --parallel

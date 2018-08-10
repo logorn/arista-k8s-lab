@@ -1,0 +1,12 @@
+---
+
+group: 'kubernetes'
+default_lease_time: 600
+max_lease_time: 7200
+log_facility: local7
+subnet: "{{ (provisioner + \"/\" + mgmt_mask) | ipaddr | ipaddr('network') }}"
+dhcp_range_start: "{{ (provisioner + \"/\" + mgmt_mask) | ipaddr(dhcp_start_index) | ipaddr('address') }}"
+dhcp_range_end: "{{ (provisioner + \"/\" + mgmt_mask) | ipaddr(dhcp_end_index) | ipaddr('address') }}"
+next_server: "{{ provisioner }}"
+domain_name_servers: "{{ provisioner }}, 8.8.8.8"
+netmask: "{{ mgmt_mask }}"

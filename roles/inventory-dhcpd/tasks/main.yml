@@ -1,0 +1,26 @@
+---
+
+- name: Install required packages
+  register: install_dhcpd_packages
+  include_tasks: pkg.yml
+
+- name: Produce inventory dhcp reservations
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+  register: dhcp_resa
+
+- name: isc-dhcp-server default conf
+  template:
+    src: isc-dhcp-server.j2
+    dest: /etc/default/isc-dhcp-server
+  register: dhcp_default_conf
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: isc-dhcp-server
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_dhcpd
+  when: dhcp_resa.changed or dhcp_default_conf.changed

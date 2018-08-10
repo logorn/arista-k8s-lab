@@ -1,0 +1,8 @@
+---
+
+- name: Prepare provisioner
+  gather_facts: yes
+  hosts: provisioner
+  roles:
+    - http-https-proxy
+    - inventory-dhcpd
