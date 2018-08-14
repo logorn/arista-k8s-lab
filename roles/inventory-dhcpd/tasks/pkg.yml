@@ -2,6 +2,8 @@
 
 - set_fact:
     proxy_conf: "{{proxy_env if proxy_env is defined else '{\"http_proxy\": \"\", \"https_proxy\": \"\"}'}}"
+  tags:
+    - packages
 
 - name: Install isc-dhcp-server
   when: ansible_os_family == "Debian"
@@ -9,3 +11,5 @@
     name: "isc-dhcp-server"
     state: present
   environment: "{{proxy_conf}}"
+  tags:
+    - packages

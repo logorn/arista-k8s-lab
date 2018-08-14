@@ -70,7 +70,9 @@ Vagrant.configure(VAGRANTFILE_API_VER) do |config|
         override.vm.box = host["box"]["libvirtbox"]
         override.vm.box_version = host["box"]["libvirtbox_version"]
         if /provisioner/.match(host['name'])
-          override.vm.synced_folder '.', '/vagrant', disabled: false
+          override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
+          override.vm.synced_folder '.', '/provisioning', type: 'rsync',
+            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
         else
           if /(?i:veos)/.match(host['box']['vbox'])
             override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
@@ -95,6 +97,10 @@ SCRIPT
 
       srv.vm.provider :virtualbox do |v, override|
         override.vm.box = host["box"]["vbox"]
+
+        if /provisioner/.match(host['name'])
+          override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
+        end
 
         if /(?i:k8s-.*)/.match(host['name'])
           v.customize [
@@ -158,9 +164,9 @@ cp /etc/hosts /tmp/hosts
 cat /tmp/hosts | /bin/sed 's/vagrant/'#{host['name']}'/g' > /etc/hosts
 cp /etc/hosts /tmp/hosts
 cat /tmp/hosts | /bin/sed 's/ubuntu1604\.localdomain/'#{host['name']}'/g' > /etc/hosts
-if [ -f /vagrant/ssh-config ]; then
+if [ -f /provisioning/ssh-config ]; then
   mkdir -p /home/vagrant/.ssh
-  cp /vagrant/ssh-config /home/vagrant/.ssh/config
+  cp /provisioning/ssh-config /home/vagrant/.ssh/config
 fi
 SCRIPT
 
@@ -208,7 +214,7 @@ apt-get install ansible -y
 apt-get install python-pip -y
 pip install ntc-ansible
 echo "Installation completed..."
-cd /vagrant
+cd /provisioning
 ansible-playbook ./provisioner.yml
 #ansible-playbook ./site.yml
 SCRIPT

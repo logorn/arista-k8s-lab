@@ -1,0 +1,24 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provider "virtualbox"
+
+  config.ssh.insert_key = false
+
+  config.vm.network :private_network, ip: "10.0.5.254"
+
+  config.vm.define "provisioner" do |prov|
+    prov.vm.hostname = "provisioner"
+    prov.vm.box = "virtualbox-provisioner"
+
+    config.vm.provider :virtualbox do |v, override|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+    end
+
+  end
+end

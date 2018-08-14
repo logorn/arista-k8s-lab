@@ -1,0 +1,170 @@
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/pre-provision/vagrant.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/pre-provision/createdirs.sh"
+    },
+    {
+      "type": "file",
+      "source": "../ansible.cfg",
+      "destination": "/provisioning/ansible.cfg"
+    },
+    {
+      "type": "file",
+      "source": "../group_vars",
+      "destination": "/provisioning/group_vars"
+    },
+    {
+      "type": "file",
+      "source": "../hosts",
+      "destination": "/provisioning/hosts"
+    },
+    {
+      "type": "file",
+      "source": "../leafspine-report",
+      "destination": "/provisioning/leafspine-report"
+    },
+    {
+      "type": "file",
+      "source": "../provisioner-config",
+      "destination": "/provisioning/provisioner-config"
+    },
+    {
+      "type": "file",
+      "source": "../provisioner.yml",
+      "destination": "/provisioning/provisioner.yml"
+    },
+    {
+      "type": "file",
+      "source": "../roles",
+      "destination": "/provisioning/roles"
+    },
+    {
+      "type": "file",
+      "source": "../site.yml",
+      "destination": "/provisioning/site.yml"
+    },
+    {
+      "type": "file",
+      "source": "../ssh-config",
+      "destination": "/provisioning/ssh-config"
+    },
+    {
+      "type": "file",
+      "source": "../topology.yml",
+      "destination": "/provisioning/topology.yml"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/kbrd.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/utctimezone.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/setup.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/cleanup.sh"
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=fr_FR<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=fr<wait>",
+        " keyboard-configuration/layout=fr<wait>",
+        " keyboard-configuration/variant=latin9<wait>",
+        " locale=fr_FR<wait>",
+        " netcfg/get_domain=local<wait>",
+        " netcfg/get_hostname=provisioner<wait>",
+        " netcfg/choose_interface=auto<wait>",
+        " grub-installer/bootdev=/dev/sda<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 81920,
+      "guest_os_type": "Ubuntu_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_urls": [
+        "iso/ubuntu-16.04.5-server-amd64.iso",
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso"
+      ],
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "guest_additions_mode": "attach",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "provisioner",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "1024"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--macaddress1",
+          "16189C195059"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nic2",
+          "intnet"
+        ]
+      ]
+    }
+  ],
+  "variables": {
+  },
+  "post-processors": [
+    {
+      "output": "builds/{{.Provider}}-provisioner.box",
+      "type": "vagrant"
+    }
+  ]
+}
