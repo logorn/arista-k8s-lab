@@ -1,0 +1,4 @@
+{
+  "format": "qcow2",
+  "vm_name": "provisioner-qcow2"
+}
