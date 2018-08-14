@@ -6,3 +6,5 @@
     update_cache: yes
     name: "trafficserver"
     state: present
+  tags:
+    - packages

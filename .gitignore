@@ -7,3 +7,6 @@ leafspine-report/output
 output/
 *.retry
 backup/
+packer-provisioner-build/packer_cache
+packer-provisioner-build/iso
+packer-provisioner-build/output-virtualbox-iso

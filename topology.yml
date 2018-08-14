@@ -38,7 +38,7 @@
 - name: provisioner
   ram: 512
   box:
-    vbox: bento/ubuntu-16.04
+    vbox: virtualbox-provisioner
     libvirtbox: generic/ubuntu1604
   links:
     - name: mgmt
