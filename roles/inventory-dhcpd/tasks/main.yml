@@ -6,6 +6,15 @@
   tags:
     - packages
 
+- file:
+    path: /var/lib/dhcp/dhcpd.leases
+    owner: root
+    group: dhcpd
+    mode: 0644
+  tags:
+    - packages
+    - configuration
+
 - name: Produce inventory dhcp reservations
   template:
     src: dhcpd.conf.j2
@@ -22,7 +31,7 @@
   tags:
     - configuration
 
-- name: Enable and restart kubelet engine
+- name: Enable and restart isc-dhcp-server
   systemd:
     name: isc-dhcp-server
     daemon_reload: yes
@@ -32,3 +41,14 @@
   when: dhcp_resa.changed or dhcp_default_conf.changed
   tags:
     - configuration
+
+- name: Enable and restart isc-dhcp-server
+  systemd:
+    name: isc-dhcp-server
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_dhcpd
+  when: install_dhcpd_packages.changed
+  tags:
+    - packages

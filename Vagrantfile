@@ -100,6 +100,8 @@ SCRIPT
 
         if /provisioner/.match(host['name'])
           override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
+          override.vm.synced_folder '.', '/provisioning', type: 'rsync',
+            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
         end
 
         if /(?i:k8s-.*)/.match(host['name'])
@@ -179,7 +181,7 @@ sed -i -e '/^#VAGRANT-BEGIN$/{N; /\\n# The contents below are automatically gene
 
 eth1here=$(cat /etc/network/interfaces | grep 'iface eth1 inet dhcp' 2>/dev/null | wc -l)
 if [ "${eth1here}" == "0" ]; then
-  echo -e "\\nVAGRANT-HACK-BEGIN\\nauto eth1\\niface eth1 inet dhcp\\nVAGRANT-HACK-END" >> /etc/network/interfaces
+  echo -e "\\n#VAGRANT-HACK-BEGIN\\nauto eth1\\niface eth1 inet dhcp\\n#VAGRANT-HACK-END" >> /etc/network/interfaces
 fi
 
 SCRIPT

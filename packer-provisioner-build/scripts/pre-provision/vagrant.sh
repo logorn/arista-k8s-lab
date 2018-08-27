@@ -8,5 +8,9 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7
 EOF
 
 # Add vagrant user to sudoers.
-echo "vagrant        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+#cho "vagrant        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+echo 'vagrant ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/99_vagrant;
+chmod 440 /etc/sudoers.d/99_vagrant;
+
 sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
+sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=sudo' /etc/sudoers;

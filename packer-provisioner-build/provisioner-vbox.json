@@ -1,14 +1,15 @@
 {
   "provisioners": [
     {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/pre-provision/vagrant.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/pre-provision/createdirs.sh"
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/pre-provision/createdirs.sh"
+      ],
+      "type": "shell"
     },
     {
       "type": "file",
@@ -61,24 +62,25 @@
       "destination": "/provisioning/topology.yml"
     },
     {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/kbrd.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/utctimezone.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/setup.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/cleanup.sh"
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/pre-provision/vagrant.sh",
+        "scripts/update.sh",
+        "scripts/sshd.sh",
+        "scripts/networking.sh",
+        "scripts/vmware.sh",
+        "scripts/parallels.sh",
+        "scripts/kbrd.sh",
+        "scripts/utctimezone.sh",
+        "scripts/setup.sh",
+        "scripts/cleanup.sh",
+        "scripts/minimize.sh"
+      ],
+      "type": "shell"
     }
   ],
   "builders": [
@@ -161,8 +163,10 @@
   ],
   "post-processors": [
     {
-      "output": "output-provisioner-vbox/{{.Provider}}-provisioner.box",
+      "output": "output-vagrant-vbox/{{.Provider}}-provisioner.box",
       "type": "vagrant"
     }
-  ]
+  ],
+  "variables": {
+  }
 }

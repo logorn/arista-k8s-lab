@@ -12,5 +12,6 @@ packer-provisioner-build/iso
 packer-provisioner-build/output-virtualbox-iso
 packer-provisioner-build/output-qemu-qcow2
 packer-provisioner-build/output-qemu-raw
-packer-provisioner-build/output-qemu
-packer-provisioner-build/output-provisioner-vbox
+packer-provisioner-build/output-vagrant-vbox
+packer-provisioner-build/output-vagrant-qemu
+rsync.sh

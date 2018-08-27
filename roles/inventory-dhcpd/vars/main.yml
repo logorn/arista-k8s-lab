@@ -1,6 +1,6 @@
 ---
 
-group: 'kubernetes'
+pinned_hosts: ['provisioner', 'kubernetes']
 default_lease_time: 600
 max_lease_time: 7200
 log_facility: local7

@@ -1,14 +1,15 @@
 {
   "provisioners": [
     {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/pre-provision/vagrant.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/pre-provision/createdirs.sh"
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/pre-provision/createdirs.sh"
+      ],
+      "type": "shell"
     },
     {
       "type": "file",
@@ -61,30 +62,32 @@
       "destination": "/provisioning/topology.yml"
     },
     {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/kbrd.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/utctimezone.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/setup.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/cleanup.sh"
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/pre-provision/vagrant.sh",
+        "scripts/update.sh",
+        "scripts/sshd.sh",
+        "scripts/networking.sh",
+        "scripts/vmware.sh",
+        "scripts/parallels.sh",
+        "scripts/kbrd.sh",
+        "scripts/utctimezone.sh",
+        "scripts/setup.sh",
+        "scripts/cleanup.sh",
+        "scripts/minimize.sh"
+      ],
+      "type": "shell"
     }
   ],
   "builders": [
     {
+      "name": "qemu-qcow2",
       "type": "qemu",
-      "output_directory": "output-qemu-{{user `format`}}",
+      "output_directory": "output-qemu-qcow2",
       "boot_command": [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
@@ -113,8 +116,9 @@
         "<enter><wait>"
       ],
       "boot_wait": "10s",
+      "disk_compression": true,
       "disk_size": 81920,
-      "format": "{{user `format`}}",
+      "format": "qcow2",
       "headless": true,
       "accelerator": "kvm",
       "http_directory": "http",
@@ -131,7 +135,7 @@
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
-      "vm_name": "{{user `vm_name`}}",
+      "vm_name": "provisioner-qcow2",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
       "ssh_host_port_min": 3213,
@@ -144,6 +148,79 @@
         ["-netdev", "user,id=user.1"],
         ["-device", "virtio-net,netdev=user.1"]
       ]
+    },
+   {
+      "name": "qemu-raw",
+      "type": "qemu",
+      "output_directory": "output-qemu-raw",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=fr_FR<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=fr<wait>",
+        " keyboard-configuration/layout=fr<wait>",
+        " keyboard-configuration/variant=latin9<wait>",
+        " locale=fr_FR<wait>",
+        " netcfg/get_domain=local<wait>",
+        " netcfg/get_hostname=provisioner<wait>",
+        " netcfg/choose_interface=auto<wait>",
+        " grub-installer/bootdev=/dev/vda<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_compression": true,
+      "disk_size": 81920,
+      "format": "raw",
+      "headless": true,
+      "accelerator": "kvm",
+      "http_directory": "http",
+      "http_port_min": 10082,
+      "http_port_max": 10089,
+      "iso_urls": [
+        "iso/ubuntu-16.04.5-server-amd64.iso",
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso"
+      ],
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "vm_name": "provisioner-raw",
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "ssh_host_port_min": 3213,
+      "ssh_host_port_max": 3214,
+      "qemuargs": [
+        ["-m", "1024"],
+        ["-smp", "1"],
+        ["-netdev", "user,id=user.0,hostfwd=tcp::3213-:22,hostfwd=tcp::3214-:22,net=10.0.2.0/24"],
+        ["-device", "virtio-net,netdev=user.0"],
+        ["-netdev", "user,id=user.1"],
+        ["-device", "virtio-net,netdev=user.1"]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "output-vagrant-qemu/{{.Provider}}-provisioner.box",
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "only": ["qemu-qcow2"]
     }
   ],
   "variables": {

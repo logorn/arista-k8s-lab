@@ -5,6 +5,15 @@
   tags:
     - packages
 
+- name: Install policykit-1
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "policykit-1"
+    state: present
+  environment: "{{proxy_conf}}"
+  tags:
+    - packages
+
 - name: Install isc-dhcp-server
   when: ansible_os_family == "Debian"
   apt:

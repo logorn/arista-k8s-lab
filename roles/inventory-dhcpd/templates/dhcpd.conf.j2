@@ -14,14 +14,16 @@ subnet {{ subnet }} netmask {{ netmask }} {
   next-server {{ next_server }};
   filename "pxelinux.0";
   #filename "undionly.kpxe";
-
-  {% for host in groups[group] %}
-
-  host {{ host }} {
-    hardware ethernet {{ hostvars[host]['mac'] | regex_replace('^(.{2,2})(.{2,2})(.{2,2})(.{2,2})(.{2,2})(.{2,2})$', '\\1:\\2:\\3:\\4:\\5:\\6') | lower }};
-    fixed-address {{ hostvars[host]['ansible_host'] }};
-  }
-
-  {% endfor %}
-
 }
+
+{% for pgroup in pinned_hosts %}
+
+  {% if hostvars[pgroup] %}
+    {% set hosts = [pgroup] %}
+    {% include "./templates/dhcpd_fragment.conf.j2" %}
+  {% else %}
+    {% set hosts = groups[pgroup] %}
+    {% include "./templates/dhcpd_fragment.conf.j2" %}
+  {% endif %}
+
+{% endfor %}

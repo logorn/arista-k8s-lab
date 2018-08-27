@@ -4,10 +4,6 @@ export DEBIAN_FRONTEND=noninteractive
 
 hostnamectl set-hostname "provisioner"
 
-# Disable daily apt unattended updates.
-echo 'APT::Periodic::Enable "0";' >> /etc/apt/apt.conf.d/10periodic
-
-apt-get update
 apt-get install software-properties-common -y
 LC_ALL=C.UTF-8  apt-add-repository ppa:ansible/ansible -y
 apt-get update

@@ -39,10 +39,11 @@
   ram: 512
   box:
     vbox: virtualbox-provisioner
-    libvirtbox: generic/ubuntu1604
+    libvirtbox: libvirt-provisioner
   links:
     - name: mgmt
       ip:   10.0.5.254
+      mac: "16189C18A68C"
 - name: k8s-master-001
   ram: 2048
   box:

@@ -24,6 +24,8 @@ all:
     servers:
       hosts:
         provisioner:
+          mac: 16189C18A68C
+          ansible_host: 10.0.5.254
           records_config:
             # - "LOCAL proxy.local.outgoing_ip_to_bind STRING {{ .publicip }}"
             - "LOCAL proxy.local.incoming_ip_to_bind STRING {{ provisioner }}"
