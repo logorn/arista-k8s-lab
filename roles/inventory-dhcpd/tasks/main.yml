@@ -11,6 +11,7 @@
     owner: root
     group: dhcpd
     mode: 0644
+  register: dhcpd_leases_file_rights
   tags:
     - packages
     - configuration
@@ -38,7 +39,7 @@
     state: restarted
     enabled: yes
   register: started_dhcpd
-  when: dhcp_resa.changed or dhcp_default_conf.changed
+  when: dhcp_resa.changed or dhcp_default_conf.changed or dhcpd_leases_file_rights.changed
   tags:
     - configuration
 
@@ -49,6 +50,6 @@
     state: restarted
     enabled: yes
   register: started_dhcpd
-  when: install_dhcpd_packages.changed
+  when: install_dhcpd_packages.changed or dhcpd_leases_file_rights
   tags:
     - packages
