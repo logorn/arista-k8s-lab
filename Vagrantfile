@@ -216,8 +216,7 @@ apt-get install ansible -y
 apt-get install python-pip -y
 pip install ntc-ansible
 echo "Installation completed..."
-cd /provisioning
-ansible-playbook ./provisioner.yml
+/usr/local/bin/firstboot.sh
 #ansible-playbook ./site.yml
 SCRIPT
         srv.vm.provision "shell", path: "./provisioner-config/setup.sh"
