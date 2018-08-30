@@ -18,6 +18,7 @@ install:
 	  vagrant box add file://$${VAGRANT_VBOX_PATH} --name virtualbox-provisioner; \
 	fi; \
 	if [ -f "$${VAGRANT_QEMU_PATH}" ]; then \
+          virsh vol-delete --pool default libvirt-provisioner_vagrant_box_image_0.img || true; \
 	  echo "Removing $${VAGRANT_QEMU_PATH} from vagrant if present..."; \
 	  vagrant box remove libvirt-provisioner --force || true; \
 	  echo "Adding $${VAGRANT_QEMU_PATH} to vagrant"; \

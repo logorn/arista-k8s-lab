@@ -87,23 +87,22 @@
     {
       "type": "virtualbox-iso",
       "boot_command": [
-        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<esc><wait>",
+        "<esc><wait>",
+        "<enter><wait>",
         "/install/vmlinuz<wait>",
         " auto<wait>",
         " console-setup/ask_detect=false<wait>",
-        " console-setup/layoutcode=us<wait>",
+        " console-setup/layoutcode=fr<wait>",
         " console-setup/modelcode=pc105<wait>",
         " debconf/frontend=noninteractive<wait>",
-        " debian-installer=fr_FR<wait>",
+        " debian-installer=fr_FR.UTF-8<wait>",
         " fb=false<wait>",
         " initrd=/install/initrd.gz<wait>",
         " kbd-chooser/method=fr<wait>",
         " keyboard-configuration/layout=fr<wait>",
         " keyboard-configuration/variant=latin9<wait>",
-        " locale=fr_FR<wait>",
+        " locale=fr_FR.UTF-8<wait>",
         " netcfg/get_domain=local<wait>",
         " netcfg/get_hostname=provisioner<wait>",
         " netcfg/choose_interface=auto<wait>",
@@ -119,11 +118,11 @@
       "headless": true,
       "http_directory": "http",
       "iso_urls": [
-        "iso/ubuntu-16.04.5-server-amd64.iso",
-        "http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso"
+        "iso/ubuntu-18.04.1-server-amd64.iso",
+        "http://cdimage.ubuntu.com/ubuntu/releases/18.04.1/release/ubuntu-18.04.1-server-amd64.iso"
       ],
       "iso_checksum_type": "sha256",
-      "iso_checksum": "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8",
+      "iso_checksum": "a5b0ea5918f850124f3d72ef4b85bda82f0fcd02ec721be19c1a6952791c8ee8",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
@@ -145,12 +144,6 @@
           "{{.Name}}",
           "--cpus",
           "1"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--macaddress1",
-          "16189C195059"
         ],
         [
           "modifyvm",

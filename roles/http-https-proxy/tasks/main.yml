@@ -6,6 +6,43 @@
   tags:
     - packages
 
+- name: Create status dir
+  file:
+    path: /var/run/trafficserver
+    state: directory
+    owner: trafficserver
+    group: trafficserver
+    mode: 0755
+
+- copy:
+    owner: root
+    group: root
+    content: |
+      [Unit]
+      Description=Apache Traffic Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      EnvironmentFile=-/etc/default/trafficserver
+      PIDFile=/var/run/trafficserver.cop.pid
+      ExecStart=/usr/bin/traffic_cop $TC_DAEMON_ARGS
+      ExecReload=/usr/bin/traffic_ctl config reload
+      Restart=always
+      RestartSec=1
+
+      LimitNOFILE=500000
+      LimitMEMLOCK=90000
+
+      CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_IPC_LOCK CAP_KILL CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_SETGID CAP_SETUID
+
+      ReadOnlyDirectories=/usr
+      ReadOnlyDirectories=/var/lib
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/multi-user.target.wants/trafficserver.service
+
 - name: Generate cache config
   template: src=cache_config.j2 dest=/etc/trafficserver/cache.config
   register: conf1
@@ -122,3 +159,8 @@
   when: conf1.changed or conf2.changed or conf3.changed or conf4.changed or conf5.changed or conf6.changed or conf7.changed or conf8.changed or conf9.changed or conf10.changed or conf11.changed or conf12.changed or conf13.changed or conf14.changed or conf15.changed or conf16.changed or conf17.changed or conf18.changed
   tags:
     - configuration
+
+- name: Start service trafficserver, if not running
+  service:
+    name: trafficserver
+    state: started
