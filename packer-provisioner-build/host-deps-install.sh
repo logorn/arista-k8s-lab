@@ -5,7 +5,7 @@ set +x
 
 PACKER_VERSION="1.1.3"
 RUBY_VERSION="2.3.6"
-VAGRANT_VERSION="2.0.2"
+VAGRANT_VERSION="2.0.4"
 RUBY_DEV_VERSION=$(echo ${RUBY_VERSION} | sed -e 's/\([0-9]*\.[0-9]*\)\.[0-9]*/\1/')
 
 CURRENT_DIR=$(pwd)

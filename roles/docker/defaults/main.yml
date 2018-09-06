@@ -1,4 +1,4 @@
 ---
 
-docker_version: 17.03
+docker_version: 18.06
 docker_nofile: 1000000

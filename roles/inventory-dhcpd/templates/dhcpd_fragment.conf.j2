@@ -2,5 +2,8 @@
 host {{ host }} {
   hardware ethernet {{ hostvars[host]['mac'] | regex_replace('^(.{2,2})(.{2,2})(.{2,2})(.{2,2})(.{2,2})(.{2,2})$', '\\1:\\2:\\3:\\4:\\5:\\6') | lower }};
   fixed-address {{ hostvars[host]['ansible_host'] }};
+  {% if host != "provisioner" %}
+  option nodeip "{{ hostvars[host]['nodeip'] }}";
+  {% endif %}
 }
 {% endfor %}

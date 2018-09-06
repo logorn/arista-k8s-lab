@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.ssh.insert_key = false
+
+  config.vm.provider "libvirt"
+  config.vm.provider "virtualbox"
+
+  config.vm.define "k8snode" do |prov|
+
+    prov.vm.provider :virtualbox do |vb, override|
+      override.vm.box = "virtualbox-k8snode"
+      vb.gui = false
+      vb.memory = 1024
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--ioapic", "on"]
+
+      override.vm.network "private_network",
+        virtualbox__intnet: "mgmt",
+        ip: "10.0.5.100",
+        auto_config: true,
+        type: "static",
+        mac: "16189C195059"
+    end
+
+    prov.vm.provider :libvirt do |lv, override|
+      override.vm.box = "libvirt-k8snode"
+      #prov.vm.box = output-qemu-qcow2
+      #lv.driver = "kvm"
+      #lv.storage_pool_name = "default"
+      #lv.host = 'localhost'
+      #lv.uri = 'qemu:///system'
+      #lv.boot 'hd'
+      #lv.disk_device = 'vda'
+      #lv.disk_bus = 'virtio'
+      #lv.disk_bus = 'ide'
+      lv.cpus = 1
+      lv.memory = 1024
+
+      override.vm.network "private_network",
+        libvirt__network_name: "mgmt",
+        ip: "10.0.5.100",
+        libvirt__network_address: "10.0.5.0",
+        type: "static",
+        libvirt__forward_mode: "veryisolated",
+        auto_config: true,
+        libvirt__dhcp_enabled: false,
+        libvirt__mtu: 1500,
+        model_type: "e1000",
+        mac: "16189C195059"
+    end
+
+    prov.vm.hostname = "k8snode"
+
+  end
+
+  config.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
+end

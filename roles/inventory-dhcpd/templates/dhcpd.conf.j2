@@ -2,6 +2,10 @@ ddns-update-style none;
 
 # option domain-name "example.org";
 
+option vagrant code 224 = text;
+option nodeip code 225 = text;
+option nodemask code 226 = text;
+
 default-lease-time {{ default_lease_time }};
 max-lease-time {{ max_lease_time }};
 authoritative;
@@ -10,6 +14,8 @@ log-facility {{ log_facility }};
 subnet {{ subnet }} netmask {{ netmask }} {
   range {{ dhcp_range_start }} {{ dhcp_range_end }};
   option domain-name-servers {{ domain_name_servers }};
+  option vagrant "{{ "1" if is_vagrant else "0" }}";
+  option nodemask "{{ node_mask }}";
   #option ipxe.no-pxedhcp 1;
   next-server {{ next_server }};
   filename "pxelinux.0";

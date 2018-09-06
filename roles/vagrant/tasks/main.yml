@@ -1,5 +1,11 @@
+---
+
+- shell: ". /etc/profile.d/dhcp_vars.sh && echo ${new_vagrant}"
+  changed_when: False
+  register: vagrant_sh
+
 - set_fact:
-    is_vagrant: "{{ lookup('env', 'VAGRANT') }}"
+    is_vagrant: "{{ vagrant_sh.stdout }}"
 
 - name: Management ip
   shell: "ip addr show {{ mgmt_interface }} | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*'"

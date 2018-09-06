@@ -1,5 +1,8 @@
 ---
 
+- set_fact:
+    is_vagrant: "{{ lookup('env', 'VAGRANT') }}"
+
 - name: Install required packages
   register: install_dhcpd_packages
   include_tasks: pkg.yml

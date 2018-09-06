@@ -2,8 +2,7 @@
 # vi: set ft=ruby :
 
 # Specify minimum Vagrant version and Vagrant API version
-Vagrant.require_version ">= 1.6.0"
-VAGRANTFILE_API_VER = "2"
+Vagrant.require_version ">= 2.1.4"
 
 # Plugins we require
 required_plugins = %w(vagrant-vbguest vagrant-host-shell)
@@ -15,14 +14,37 @@ def install_ssh_key()
   system "ssh-add #{Vagrant.source_root}/keys/vagrant"
 end
 
+def custom_has_plugin?(name, version=nil)
+  return false unless Vagrant.plugins_enabled?
+
+  if !version
+    # We check the plugin names first because those are cheaper to check
+    return true if Vagrant.plugin("2").manager.registered.any? { |p| p.name == name }
+  end
+
+  # Make the requirement object
+  version = Gem::Requirement.new([version]) if version
+
+  # Now check the plugin gem names
+  require "vagrant/plugin/manager"
+  Vagrant::Plugin::Manager.instance.installed_plugins.any? do |s|
+    match = s[0] == name
+    next match if !version
+    next match && version.satisfied_by?(s.version)
+  end
+end
+
 def install_plugins(required_plugins)
-  plugins_to_install = required_plugins.select { |plugin| not Vagrant.has_plugin? plugin }
-  if not plugins_to_install.empty?
-    puts "Installing plugins: #{plugins_to_install.join(' ')}"
-    if system "vagrant plugin install #{plugins_to_install.join(' ')}"
-      exec "vagrant #{ARGV.join(' ')}"
-    else
-      abort "Installation of one or more plugins has failed. Aborting."
+  if Vagrant.plugins_enabled?
+    plugins_to_install = required_plugins.select { |plugin| not custom_has_plugin?(plugin)}
+
+    if not plugins_to_install.empty?
+      puts "Installing plugins: #{plugins_to_install.join(' ')}"
+      if system "vagrant plugin install #{plugins_to_install.join(' ')}"
+        exec "vagrant #{ARGV.join(' ')}"
+      else
+        abort "Installation of one or more plugins has failed. Aborting."
+      end
     end
   end
 end
@@ -44,7 +66,7 @@ vagrant_root = File.dirname(__FILE__)
 hosts = YAML.load_file(vagrant_root + '/topology.yml')
 
 # Lab definition begins here
-Vagrant.configure(VAGRANTFILE_API_VER) do |config|
+Vagrant.configure("2") do |config|
 
   config.vm.provider "libvirt"
   config.vm.provider "virtualbox"
@@ -72,7 +94,7 @@ Vagrant.configure(VAGRANTFILE_API_VER) do |config|
         if /provisioner/.match(host['name'])
           override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
           override.vm.synced_folder '.', '/provisioning', type: 'rsync',
-            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
+            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-k8snode-build", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
         else
           if /(?i:veos)/.match(host['box']['vbox'])
             override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
@@ -87,6 +109,8 @@ SCRIPT
             boot_network = {'network' => 'mgmt'}
             libvirt.boot boot_network
             libvirt.boot 'hd'
+
+            override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
           end
         end
 
@@ -101,7 +125,9 @@ SCRIPT
         if /provisioner/.match(host['name'])
           override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
           override.vm.synced_folder '.', '/provisioning', type: 'rsync',
-            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
+            rsync__exclude: [ ".gitignore", ".git/", "misc", "packer-k8snode-build", "packer-provisioner-build", ".vagrant", "*.qcow2", "*.vmdk", "*.box" ]
+        else
+          override.vm.synced_folder '.', '/vagrant', id: "vagrant-root", disabled: true
         end
 
         if /(?i:k8s-.*)/.match(host['name'])
@@ -140,7 +166,7 @@ SCRIPT
                 libvirt__network_address: ((/(?i:k8s-.*)/.match(host['name']) && link["name"] == "mgmt") ? "10.0.5.0" : nil),
                 type: "static",
                 libvirt__forward_mode: "veryisolated",
-                auto_config: (/(?i:veos)/.match(host['box']['vbox']) ? false : true),
+                auto_config: (/(?i:veos|provisioner|k8s-.*)/.match(host['box']['vbox']) ? false : true),
                 libvirt__dhcp_enabled: false,
                 libvirt__mtu: 1500,
                 model_type: "e1000",
@@ -151,7 +177,7 @@ SCRIPT
               ov.vm.network "private_network",
                 virtualbox__intnet: link["name"],
                 ip: (link.key?("ip") ? link["ip"] : "169.254.1.11"),
-                auto_config: (/(?i:veos)/.match(host['box']['vbox']) ? false : true),
+                auto_config: (/(?i:veos|provisioner|k8s-.*)/.match(host['box']['vbox']) ? false : true),
                 type: ((/(?i:k8s-.*)/.match(host['name']) && link["name"] == "mgmt") ? "dhcp" : "static"),
                 mac: (link.key?("mac") ? link["mac"] : nil)
             end
@@ -165,7 +191,7 @@ export VAGRANT=1
 cp /etc/hosts /tmp/hosts
 cat /tmp/hosts | /bin/sed 's/vagrant/'#{host['name']}'/g' > /etc/hosts
 cp /etc/hosts /tmp/hosts
-cat /tmp/hosts | /bin/sed 's/ubuntu1604\.localdomain/'#{host['name']}'/g' > /etc/hosts
+cat /tmp/hosts | /bin/sed 's/ubuntu1804\.localdomain/'#{host['name']}'/g' > /etc/hosts
 if [ -f /provisioning/ssh-config ]; then
   mkdir -p /home/vagrant/.ssh
   cp /provisioning/ssh-config /home/vagrant/.ssh/config
@@ -173,16 +199,33 @@ fi
 SCRIPT
 
       if /(?i:k8s-.*)/.match(host['name'])
+        config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
         # libvirt dhcp hack
         script += <<-SCRIPT
-ip addr flush dev eth1
-dhclient eth1
-sed -i -e '/^#VAGRANT-BEGIN$/{N; /\\n# The contents below are automatically generated by Vagrant\\. Do not modify\\.$/ {N; /\\nauto eth1$/ {N; /\\niface eth1 inet static$/ {N; /\\n      address 169.254.1.11$/ {N; /\\n      netmask 255.255.255.0$/ {N; /\\n#VAGRANT-END$/ { s/.*// }}}}}}}' /etc/network/interfaces
+echo $@
 
-eth1here=$(cat /etc/network/interfaces | grep 'iface eth1 inet dhcp' 2>/dev/null | wc -l)
-if [ "${eth1here}" == "0" ]; then
-  echo -e "\\n#VAGRANT-HACK-BEGIN\\nauto eth1\\niface eth1 inet dhcp\\n#VAGRANT-HACK-END" >> /etc/network/interfaces
-fi
+cat <<EOF > /etc/netplan/50-vagrant.yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: true
+    eth1:
+      dhcp4: true
+      addresses: []
+EOF
+
+/usr/sbin/netplan apply
+
+#ip addr flush dev eth1
+#dhclient eth1
+#sed -i -e '/^#VAGRANT-BEGIN$/{N; /\\n# The contents below are automatically generated by Vagrant\\. Do not modify\\.$/ {N; /\\nauto eth1$/ {N; /\\niface eth1 inet static$/ {N; /\\n      address 169.254.1.11$/ {N; /\\n      netmask 255.255.255.0$/ {N; /\\n#VAGRANT-END$/ { s/.*// }}}}}}}' /etc/network/interfaces
+
+#eth1here=$(cat /etc/network/interfaces | grep 'iface eth1 inet dhcp' 2>/dev/null | wc -l)
+#if [ "${eth1here}" == "0" ]; then
+#  echo -e "\\n#VAGRANT-HACK-BEGIN\\nauto eth1\\niface eth1 inet dhcp\\n#VAGRANT-HACK-END" >> /etc/network/interfaces
+#fi
 
 SCRIPT
       end

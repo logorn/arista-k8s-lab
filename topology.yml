@@ -47,8 +47,8 @@
 - name: k8s-master-001
   ram: 2048
   box:
-    vbox: bento/ubuntu-16.04
-    libvirtbox: generic/ubuntu1604
+    vbox: virtualbox-k8snode
+    libvirtbox: libvirt-k8snode
   links:
     - name: mgmt
       ip: ""
@@ -58,8 +58,8 @@
 - name: k8s-worker-001
   ram: 2048
   box:
-    vbox: bento/ubuntu-16.04
-    libvirtbox: generic/ubuntu1604
+    vbox: virtualbox-k8snode
+    libvirtbox: libvirt-k8snode
   links:
     - name: mgmt
       ip: ""
@@ -69,8 +69,8 @@
 - name: k8s-worker-002
   ram: 2048
   box:
-    vbox: bento/ubuntu-16.04
-    libvirtbox: generic/ubuntu1604
+    vbox: virtualbox-k8snode
+    libvirtbox: libvirt-k8snode
   links:
     - name: mgmt
       ip: ""
