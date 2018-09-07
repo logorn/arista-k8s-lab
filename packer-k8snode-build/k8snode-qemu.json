@@ -12,17 +12,17 @@
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
       "expect_disconnect": true,
       "scripts": [
-        "scripts/pre-provision/vagrant.sh",
-        "scripts/update.sh",
-        "scripts/sshd.sh",
-        "scripts/networking.sh",
-        "scripts/vmware.sh",
-        "scripts/parallels.sh",
-        "scripts/kbrd.sh",
-        "scripts/utctimezone.sh",
+        "../packer-common/scripts/pre-provision/vagrant.sh",
+        "../packer-common/scripts/update.sh",
+        "../packer-common/scripts/sshd.sh",
+        "../packer-common/scripts/networking.sh",
+        "../packer-common/scripts/vmware.sh",
+        "../packer-common/scripts/parallels.sh",
+        "../packer-common/scripts/kbrd.sh",
+        "../packer-common/scripts/utctimezone.sh",
         "scripts/setup.sh",
-        "scripts/cleanup.sh",
-        "scripts/minimize.sh"
+        "../packer-common/scripts/cleanup.sh",
+        "../packer-common/scripts/minimize.sh"
       ],
       "type": "shell"
     }
